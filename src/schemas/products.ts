@@ -10,3 +10,11 @@ export const validateAddProduct = z.object({
 });
 
 
+// Update product validation schema
+export const validateUpdateProduct = z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    price: z.number().optional()
+});
+
