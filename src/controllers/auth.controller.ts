@@ -110,18 +110,7 @@ export const handleMe = async (req: Request, res: Response) => {
 }
 
 
-export const handleLoginUser2 = async (req: Request, res: Response) => {
-    
-    const users = await prisma.user.findMany({
-        where: {email: ''}
-    })
 
-
-    res.status(200).json({
-        message: 'Login Routes is working.',
-        allUsers: users
-    });
-}
 
 
 

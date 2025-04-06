@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { prisma } from '../index.js';
 import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -35,9 +36,29 @@ export const verifyTokenMiddleware = (req: Request, res: Response, next: NextFun
         next();
     } catch(e){
         console.error(e);
-        res.status(401).json({message: 'Session Expired. Please Login again.'});
+        res.status(401).json({message: 'Hioooo Session Expired. Please Login again.'});
     }
 }
 
 
 
+// verify Admin middleware
+export const verifyAdminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        const payload = JSON.parse(req.headers.user as string);
+        const user = await prisma.user.findUnique({
+            where: {
+                id: payload.id
+            }
+        })
+
+        if(user?.role === 'ADMIN') {
+            next();
+        } else{
+            res.status(401).json({message: 'Unauthorized to access this resource.'});
+        }
+    } catch(e){
+        console.error(e);
+        res.status(401).json({message: 'Unauthorized to access this resource.'});
+    }
+}
