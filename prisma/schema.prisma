@@ -20,6 +20,7 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  address   Address?
 
   @@map("users")
 }
@@ -36,3 +37,12 @@ model Product {
   @@map("products")
 }
 
+model Address {
+  id Int @id @default(autoincrement())
+  address String
+  city String
+  state String
+  pincode Int
+  userId Int @unique
+  user User @relation(fields: [userId], references: [id])
+}
