@@ -44,7 +44,7 @@ model Address {
   city          String
   state         String
   pincode       Int
-  userId        Int    @unique
+  userId        Int    
   user          User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())

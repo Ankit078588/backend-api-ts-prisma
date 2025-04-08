@@ -1,0 +1,99 @@
+import { Request, Response } from 'express'
+import { prisma } from '../index.js';
+import { validateAddAddressSchema } from '../schemas/users.js'
+
+
+
+export const handleAddAddress = async (req: Request, res: Response) => {
+    try {
+        // 1. validate user inputs
+        const result = validateAddAddressSchema.safeParse(req.body);
+        if(!result.success) {
+            res.status(200).json({ success: false, error: result.error.issues[0].message });
+            return;
+        }
+
+        // 2. find userId - jwt payload
+        const payload = JSON.parse(req.headers.user as string);
+        const userId = Number(payload.id);
+
+        // 3. save address
+        const data = result.data;
+        const newAddress = await prisma.address.create({
+            data: {
+                ...data,
+                userId: userId
+            }
+        })
+
+        res.status(200).json({message: 'Address added.', newAddress});
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({message: 'Internal Server Error', error});
+    }
+}
+
+export const handleUpdateAddress = async (req: Request, res: Response) => {
+    try {
+        
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({message: 'Internal Server Error', error});
+    }
+}
+
+export const handleDeleteAddress = async (req: Request, res: Response) => {
+    try {
+        // find userId - jwt payload
+        const payload = JSON.parse(req.headers.user as string);
+        const userId = Number(payload.id);
+        const addressId = Number(req.params.addressId);
+        if(!addressId) {
+            res.status(404).json({message: 'AddressId is missing.'});
+            return;
+        }
+
+        // check if address exists OR not
+        const addr = await prisma.address.findUnique({
+            where: {id: addressId}
+        })
+        if(!addr) {
+            res.status(404).json({success: false, message: 'Address not found.'})
+            return;
+        }
+
+        // Delete address
+        const deletedAddress = await prisma.address.delete({
+            where: {id: addressId}
+        })
+
+        res.status(200).json({message: 'Address deleted.', deletedAddress});
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({message: 'Internal Server Error', error});
+    }
+}
+
+export const handleListAddress = async (req: Request, res: Response) => {
+    try {
+        // find userId - jwt payload
+        const payload = JSON.parse(req.headers.user as string);
+        const userId = Number(payload.id);
+
+        // find all addresses
+        const address = await prisma.user.findUnique({
+            where: {id: userId},
+            select: {address: true}
+        })
+
+        res.status(200).json({message: 'Address fetched.', address});
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({message: 'Internal Server Error', error});
+    }
+}
+
+
+
+
+

@@ -12,7 +12,7 @@ app.use(express.urlencoded({extended: true}))
 
 
 
-import rootRoutes from './routes/index.routes.js';
+import rootRoutes from './routes/index.js';
 app.use('/api', rootRoutes);
 
 
