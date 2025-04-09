@@ -1,13 +1,14 @@
 import { Request, Response } from 'express'
 import { prisma } from '../index.js';
-import { validateAddAddressSchema } from '../schemas/users.js'
+import { ValidateAddAddressSchema, ValidatUpdateUserSchema } from '../schemas/users.js'
+import { Address } from '@prisma/client';
 
 
 
 export const handleAddAddress = async (req: Request, res: Response) => {
     try {
         // 1. validate user inputs
-        const result = validateAddAddressSchema.safeParse(req.body);
+        const result = ValidateAddAddressSchema.safeParse(req.body);
         if(!result.success) {
             res.status(200).json({ success: false, error: result.error.issues[0].message });
             return;
@@ -93,7 +94,63 @@ export const handleListAddress = async (req: Request, res: Response) => {
     }
 }
 
+export const handleUpdateUser = async (req: Request, res: Response) => {
+    try {
+        // find userId - jwt payload
+        const payload = JSON.parse(req.headers.user as string);
+        const userId = Number(payload.id);
+
+        // validate user i/p
+        const result = ValidatUpdateUserSchema.safeParse(req.body);
+        if(!result.success) {
+            res.status(200).json({ success: false, error: result.error.issues[0].message });
+            return;
+        }
+
+        // preparing data
+        const data = result.data;
+
+        // check defaultBillingAddress exists OR not
+        if(data.defaultBillingAddressId) {
+            const addressFound = await prisma.address.findUnique({
+                where: {id: data.defaultBillingAddressId}
+            });
+            if(!addressFound || addressFound.userId !== userId) {
+                res.status(404).json({success: false, message: 'Incorrect Billing Address Id.'});
+                return;
+            }
+        }
+
+        // find defaultShippingAddress exists OR not
+        if(data.defaultShippingAddressId) {
+            const addressFound = await prisma.address.findUnique({
+                where: {id: data.defaultShippingAddressId}
+            });
+            if(!addressFound || addressFound.userId !== userId) {
+                res.status(404).json({success: false, message: 'Incorrect Shipping Address Id.'});
+                return;
+            }
+        }
+
+        // update user
+        const updatedUser = await prisma.user.update({
+            where: {id: userId},
+            data: data
+        })
+
+        res.status(200).json({message: 'Address updated successfully.', updatedUser});
+    } catch(error) {
+        console.error(error);
+        res.status(500).json({message: 'Internal Server Error', error});
+    }
+}
 
 
+
+let data = {
+    name: "ankit",
+    defaultShippingAddressId: 3,
+    defaultBillingAddressId: 4,
+}
 
 

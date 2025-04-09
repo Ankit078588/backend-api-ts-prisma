@@ -11,7 +11,7 @@ export const validateSignup = z.object({
 
 
 // Add address schema
-export const validateAddAddressSchema = z.object({
+export const ValidateAddAddressSchema = z.object({
     address_line1: z.string().nonempty("address_line1 is required"),
     address_line2: z.string().nonempty("address_line2 is required"),
     city: z.string().nonempty("City is required"),
@@ -24,9 +24,20 @@ export const validateAddAddressSchema = z.object({
 
 
 
-//   address_line1 String
-//   address_line2 String
-//   city          String
-//   state         String
-//   pincode       Int
-//   ---userId        Int
+// name                     String
+// -----email                    String    @unique
+// -----password                 String
+// -----role                     Role      @default(USER)
+// -----createdAt                DateTime  @default(now())
+// -----updatedAt                DateTime  @updatedAt
+// -----address                  Address[]
+// defaultShippingAddressId Int?
+// defaultBillingAddressId  Int?
+
+
+// Update User Schema
+export const ValidatUpdateUserSchema = z.object({
+    name: z.string().optional(),
+    defaultShippingAddressId: z.number().optional(),
+    defaultBillingAddressId: z.number().optional()
+});
