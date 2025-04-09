@@ -147,10 +147,4 @@ export const handleUpdateUser = async (req: Request, res: Response) => {
 
 
 
-let data = {
-    name: "ankit",
-    defaultShippingAddressId: 3,
-    defaultBillingAddressId: 4,
-}
-
 
