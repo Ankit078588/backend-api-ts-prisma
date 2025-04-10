@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../index.js';
-import { addToCartSchema, deleteFromCartSchema } from '../schemas/carts.js'
+import { addToCartSchema, deleteFromCartSchema, changeQuantitySchema } from '../schemas/carts.js'
 
 
 export const addItemToCart = async (req: Request, res: Response) => {
@@ -108,8 +108,21 @@ export const deleteItemFromCart = async (req: Request, res: Response) => {
 
 export const changeQuantity = async (req: Request, res: Response) => {
     try {
+        // validate user input
+        const result = changeQuantitySchema.safeParse(req.body);
+        if(!result.success) {
+            res.status(404).json({success: false, error: result.error.issues[0].message});
+            return;
+        }
+
+        const cartId = Number(req.query.cartId);
+        const quantity = result.data.quantity;
+        const updatedCart = await prisma.cartItems.update({
+            where: { id : cartId },
+            data: { quantity: quantity }
+        })
         
-        res.status(200).json({message: 'Address updated successfully.'});
+        res.status(200).json({message: 'Quantity updated successfully.', updatedCart});
     } catch(error) {
         console.error(error);
         res.status(500).json({message: 'Internal Server Error', error});

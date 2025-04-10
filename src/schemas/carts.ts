@@ -22,3 +22,12 @@ export const deleteFromCartSchema = z.object({
         invalid_type_error: "Product Id must be a number",
       })
 })
+
+
+
+export const changeQuantitySchema = z.object({
+    quantity: z.number({
+        required_error: "Quantity is required.",
+        invalid_type_error: "Quantity must be a number",
+    })
+})
