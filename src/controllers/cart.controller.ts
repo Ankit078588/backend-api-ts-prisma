@@ -108,6 +108,9 @@ export const deleteItemFromCart = async (req: Request, res: Response) => {
 
 export const changeQuantity = async (req: Request, res: Response) => {
     try {
+        const payload = JSON.parse(req.headers.user as string);
+        const userId = Number(payload.id);
+
         // validate user input
         const result = changeQuantitySchema.safeParse(req.body);
         if(!result.success) {
@@ -115,10 +118,21 @@ export const changeQuantity = async (req: Request, res: Response) => {
             return;
         }
 
-        const cartId = Number(req.query.cartId);
+        const cartId = Number(req.params.cartId);
         const quantity = result.data.quantity;
+        
+        // find cart
+        const cartItem = await prisma.cartItems.findUnique({
+            where: {id: cartId}
+        })
+        if(cartItem?.userId != userId) {
+            res.status(404).json({success: false, message: 'Invalid cart Id.'});
+            return;
+        }
+
+        // update cart
         const updatedCart = await prisma.cartItems.update({
-            where: { id : cartId },
+            where: { id: cartId, userId: userId },
             data: { quantity: quantity }
         })
         
